@@ -9,7 +9,7 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 
-import type.client.work.Utils;
+import type.common.work.Utils;
 
 public class SConnect extends JPanel {
 	private static final long serialVersionUID = -9136329134291001979L;
@@ -70,11 +70,22 @@ public class SConnect extends JPanel {
 		TextPane2 = new JTextPane();
 		TextPane2.setFont(new Font("맑은 고딕", 1, 40));
 		TextPane2.setText("INITIALIZING...");
-		TextPane2.setSize(TextPane2.getPreferredSize().width + 1, TextPane2.getPreferredSize().height);
+		TextPane2.setSize(TextPane2.getPreferredSize().width, TextPane2.getPreferredSize().height);
 		TextPane2.setForeground(Color.white);
 		TextPane2.setOpaque(false);
 		TextPane2.setLocation((getWidth() - TextPane2.getWidth()) / 2, getHeight() - 300);
 		add(TextPane2);
+		
+		{
+			TextPane1.setSize(TextPane1.getPreferredSize().width + 1, TextPane1.getPreferredSize().height);
+			TextPane1.setLocation((getWidth() - TextPane1.getWidth()) / 2, 100);
+			
+			TextPane2.setSize(TextPane2.getPreferredSize().width + 1, TextPane2.getPreferredSize().height);
+			TextPane2.setLocation((getWidth() - TextPane2.getWidth()) / 2, getHeight() - 300);
+			
+			Panel1.setSize(200, 200);
+			Panel1.setLocation(getWidth() / 2 - 100, 300);
+		}
 	}
 
 	@Override

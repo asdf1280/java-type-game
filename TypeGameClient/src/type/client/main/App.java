@@ -5,7 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
-import type.client.work.Utils;
+import type.common.work.Utils;
 
 public class App extends JPanel {
 	public static enum Layers {
