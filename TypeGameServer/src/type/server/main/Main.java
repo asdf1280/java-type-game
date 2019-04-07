@@ -10,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import type.common.work.Utils;
+import type.server.game.MatchMaking;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
@@ -23,12 +24,14 @@ public class Main {
 		l.info("ServerBootstrap", "Opening socket...");
 		EventLoopGroup boss = new NioEventLoopGroup(5);
 		EventLoopGroup work = new NioEventLoopGroup(5);
+		EventLoopGroup game = new NioEventLoopGroup(5);
 		try {
 			ServerBootstrap sb = new ServerBootstrap();
 			sb.group(boss, work).channel(NioServerSocketChannel.class).localAddress(Utils.port)
 					.childHandler(new ServerInitializer());
 
 			// Server booting here
+			MatchMaking.startThread(game);
 
 			ChannelFuture ff = sb.bind().sync();
 			l.info("ServerBootstrap", "Started server.");

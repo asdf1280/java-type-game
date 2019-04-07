@@ -5,6 +5,7 @@ import static type.common.work.Utils.l;
 import java.net.InetSocketAddress;
 
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import type.common.handler.TypeCommonPacketPrepender;
 import type.common.handler.TypeCommonPacketSplitter;
@@ -20,10 +21,15 @@ public class ServerInitializer extends ChannelInitializer<NioSocketChannel> {
 		l.info("New connection from " + ((InetSocketAddress) ch.remoteAddress()).getHostName());
 		TypeServerInboundHandler handle = new TypeServerInboundHandler();
 		TypeCommonPriorityHandler priority = new TypeCommonPriorityHandler();
-		ch.pipeline().addLast("inboudnsplit", new TypeCommonPacketSplitter())
-				.addLast("prepend", new TypeCommonPacketPrepender()).addLast("encode", new TypeServerPacketEncoder())
-				.addLast("decode", new TypeServerPacketDecoder()).addLast("inboundpriority", priority)
-				.addLast("inboundhandle", handle);
+		ChannelPipeline pipe = ch.pipeline();
+//		pipe.addLast("compressencode", ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP, 5));
+//		pipe.addLast("compressdecode", ZlibCodecFactory.newZlibDecoder(ZlibWrapper.GZIP));
+		pipe.addLast("inboudnsplit", new TypeCommonPacketSplitter());
+		pipe.addLast("prepend", new TypeCommonPacketPrepender());
+		pipe.addLast("encode", new TypeServerPacketEncoder());
+		pipe.addLast("decode", new TypeServerPacketDecoder());
+		pipe.addLast("inboundpriority", priority);
+		pipe.addLast("inboundhandle", handle);
 	}
 
 }

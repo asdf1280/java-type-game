@@ -16,6 +16,9 @@ import type.common.packet.login.PacketSbLoginAuthenticate;
 import type.common.packet.login.PacketSbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginHandshake;
 import type.common.packet.login.PacketSbLoginTest;
+import type.common.packet.match.PacketCbMatchCanceled;
+import type.common.packet.match.PacketCbMatchStarted;
+import type.common.packet.match.PacketSbMatchCancel;
 import type.common.packet.singleplayer.PacketSbSingleStopPlay;
 import type.common.packet.user.PacketCbUserLobbyChat;
 import type.common.packet.user.PacketSbUserLobbyChat;
@@ -49,7 +52,7 @@ public enum ChannelState {
 			add(PacketDirection.SERVERBOUND, PacketSbUserStartMatchmake.class);
 
 			add(PacketDirection.CLIENTBOUND, PacketCbUserLobbyChat.class);
-			
+
 			addAllPackets();
 		}
 
@@ -60,6 +63,11 @@ public enum ChannelState {
 	},
 	MATCH(2) {
 		{
+			add(PacketDirection.CLIENTBOUND, PacketCbMatchCanceled.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbMatchStarted.class);
+
+			add(PacketDirection.SERVERBOUND, PacketSbMatchCancel.class);
+
 			addAllPackets();
 		}
 

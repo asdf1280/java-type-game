@@ -6,9 +6,11 @@ import type.common.packet.all.PacketSbAllClose;
 import type.common.packet.login.PacketCbLoginAuthenticateResult;
 import type.common.packet.login.PacketSbLoginAnonymous;
 import type.common.packet.login.PacketSbLoginAuthenticate;
+import type.common.packet.match.PacketSbMatchCancel;
 import type.common.packet.singleplayer.PacketSbSingleStopPlay;
 import type.common.packet.user.PacketSbUserLobbyChat;
 import type.common.packet.user.PacketSbUserPlaySingle;
+import type.common.packet.user.PacketSbUserStartMatchmake;
 import type.common.work.Sha512Utils;
 import type.common.work.Utils;
 
@@ -72,7 +74,7 @@ public class TypeNetworkWorker extends NetworkWorker {
 
 	@Override
 	public void singleToggle(boolean single) {
-		if(single) {
+		if (single) {
 			PacketSbUserPlaySingle p = new PacketSbUserPlaySingle();
 			ci.handle.sendPacket(p);
 		} else {
@@ -98,5 +100,22 @@ public class TypeNetworkWorker extends NetworkWorker {
 		PacketSbUserLobbyChat p = new PacketSbUserLobbyChat();
 		p.message = msg;
 		ci.handle.sendPacket(p);
+	}
+
+	@Override
+	public void user_matchmake_start() {
+		PacketSbUserStartMatchmake p = new PacketSbUserStartMatchmake();
+		ci.handle.sendPacket(p);
+	}
+
+	@Override
+	public void user_matchmake_cancel() {
+		PacketSbMatchCancel p = new PacketSbMatchCancel();
+		ci.handle.sendPacket(p);
+	}
+
+	@Override
+	public void setMatchCallback(MatchCallback mcb) {
+		ci.handle.mc = mcb;
 	}
 }

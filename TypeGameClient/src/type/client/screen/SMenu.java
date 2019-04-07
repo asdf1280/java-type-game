@@ -44,6 +44,7 @@ public class SMenu extends JPanel {
 
 	protected KButton Button1;
 	protected KButton Button2;
+	protected KButton Button3;
 	protected JTextPane TextPane1;
 	protected JTextPane TextPane2;
 	protected JTextField TextField1;
@@ -92,6 +93,37 @@ public class SMenu extends JPanel {
 			}).start();
 		});
 		add(Button1);
+		
+		Button3 = new KButton();
+		Button3.setFont(new Font("맑은 고딕", 1, 50));
+		Button3.setText("멀티플레이");
+		Button3.setSize(350, 120);
+		Button3.setBackground(new Color(200, 0, 0));
+		Button3.setLocation((getWidth() - Button3.getWidth()) / 2, Button1.getY() + Button1.getHeight());
+		Button3.setForeground(Color.white);
+		Button3.addMouseListener(cursor);
+		Button3.addActionListener(e -> {
+			Main.app.lp.remove(SMenu.this);
+
+			SLoad load = new SLoad(cursor);
+			Main.app.lp.setLayer(load, Layers.LOAD.layer);
+			Main.app.lp.add(load);
+			load.initializeComponent();
+
+			new Thread(() -> {
+				Utils.sleep(1000);
+
+				Main.app.lp.remove(load);
+
+				Main.nw.singleToggle(true);
+
+				SPlay play = new SPlay(cursor);
+				Main.app.lp.setLayer(play, Layers.MENU.layer);
+				Main.app.lp.add(play);
+				play.initializeComponent("searchedwords");
+			}).start();
+		});
+		add(Button3);
 
 		Button2 = new KButton();
 		Button2.setText("종료");

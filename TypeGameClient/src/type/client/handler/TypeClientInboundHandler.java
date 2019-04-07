@@ -29,7 +29,7 @@ import type.common.packet.login.PacketCbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginHandshake;
 import type.common.packet.match.PacketCbMatchCanceled;
-import type.common.packet.match.PacketCbMatchMatchmakingInfo;
+import type.common.packet.match.PacketCbMatchStarted;
 import type.common.packet.user.PacketCbUserLobbyChat;
 import type.common.work.Utils;
 
@@ -136,7 +136,7 @@ public class TypeClientInboundHandler extends SimpleChannelInboundHandler<Packet
 	public MatchCallback mc = null;
 
 	@Override
-	public void process(PacketCbMatchMatchmakingInfo p) {
+	public void process(PacketCbMatchStarted p) {
 		if (mc != null) {
 			mc.matchInfo(p);
 		}

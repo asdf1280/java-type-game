@@ -8,4 +8,7 @@ public abstract class NetworkWorker {
 	public abstract void anonymousLogin();
 	public abstract void setChatCallback(ChatCallback ccb);
 	public abstract void chat(String msg);
+	public abstract void user_matchmake_start();
+	public abstract void user_matchmake_cancel();
+	public abstract void setMatchCallback(MatchCallback mcb);
 }

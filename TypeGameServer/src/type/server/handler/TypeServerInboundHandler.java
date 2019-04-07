@@ -25,6 +25,7 @@ import type.common.handler.TypeCommonPacketEncryptor;
 import type.common.listener.PacketAllSbListener;
 import type.common.listener.PacketListener;
 import type.common.listener.PacketLoginSbListener;
+import type.common.listener.PacketMatchSbListener;
 import type.common.listener.PacketPlaySbListener;
 import type.common.listener.PacketSingleSbListener;
 import type.common.listener.PacketUserSbListener;
@@ -38,6 +39,9 @@ import type.common.packet.login.PacketSbLoginAuthenticate;
 import type.common.packet.login.PacketSbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginHandshake;
 import type.common.packet.login.PacketSbLoginTest;
+import type.common.packet.match.PacketCbMatchCanceled;
+import type.common.packet.match.PacketCbMatchStarted;
+import type.common.packet.match.PacketSbMatchCancel;
 import type.common.packet.singleplayer.PacketSbSingleStopPlay;
 import type.common.packet.user.PacketCbUserLobbyChat;
 import type.common.packet.user.PacketSbUserLobbyChat;
@@ -47,9 +51,11 @@ import type.common.work.AttributeSaver;
 import type.common.work.Sha512Utils;
 import type.common.work.Utils;
 import type.server.data.UserData;
+import type.server.game.MatchMaking;
+import type.server.game.MatchUserData;
 
 public class TypeServerInboundHandler extends SimpleChannelInboundHandler<Packet<?>> implements PacketLoginSbListener,
-		PacketUserSbListener, PacketAllSbListener, PacketPlaySbListener, PacketSingleSbListener {
+		PacketUserSbListener, PacketAllSbListener, PacketPlaySbListener, PacketSingleSbListener, PacketMatchSbListener {
 
 	public Channel ch = null;
 	public ChannelHandlerContext ctx = null;
@@ -244,7 +250,7 @@ public class TypeServerInboundHandler extends SimpleChannelInboundHandler<Packet
 	@Override
 	public void process(PacketSbUserLobbyChat packet) {
 		PacketCbUserLobbyChat p = new PacketCbUserLobbyChat();
-		p.sender = Sha512Utils.shaencode(((InetSocketAddress)ch.remoteAddress()).getHostName() + nickSalt).substring(0, 6);
+		p.sender = getName();
 		p.message = packet.message;
 		for(Channel cah : channels) {
 			if(cah.attr(AttributeSaver.state).get() == ChannelState.USER) {
@@ -253,9 +259,40 @@ public class TypeServerInboundHandler extends SimpleChannelInboundHandler<Packet
 		}
 	}
 
+	public String getName() {
+		return Sha512Utils.shaencode(((InetSocketAddress)ch.remoteAddress()).getHostName() + nickSalt).substring(0, 6);
+	}
+	
+	MatchUserData mud = null;
+
 	@Override
 	public void process(PacketSbUserStartMatchmake packetSbUserStartMatchmake) {
 		PacketCbAllSetState p = new PacketCbAllSetState();
 		p.cs = ChannelState.MATCH;
+		sendPacket(p);
+		setState(ChannelState.MATCH);
+		
+		PacketCbMatchStarted p1 = new PacketCbMatchStarted();
+		sendPacket(p1);
+		
+		mud = new MatchUserData();
+		mud.handle = this;
+		
+	}
+
+	@Override
+	public void process(PacketSbMatchCancel packet) {
+		MatchMaking.queue.remove(mud);
+		mud = null;
+		
+		PacketCbMatchCanceled p1 = new PacketCbMatchCanceled();
+		p1.clientCaused = true;
+		p1.msg = "CLIENT CAUSED";
+		sendPacket(p1);
+		
+		PacketCbAllSetState p = new PacketCbAllSetState();
+		p.cs = ChannelState.USER;
+		sendPacket(p);
+		setState(ChannelState.USER);
 	}
 }

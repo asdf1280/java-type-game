@@ -18,6 +18,8 @@ public class ClientInitializer extends ChannelInitializer<NioSocketChannel> {
 	@Override
 	protected void initChannel(NioSocketChannel ch) throws Exception {
 		ChannelPipeline pipe = ch.pipeline();
+//		pipe.addLast("compressencode", ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP, 5));
+//		pipe.addLast("compressdecode", ZlibCodecFactory.newZlibDecoder(ZlibWrapper.GZIP));
 		pipe.addLast("split", new TypeCommonPacketSplitter());
 		pipe.addLast("prepend", new TypeCommonPacketPrepender());
 		pipe.addLast("encode", new TypeClientPacketEncoder());

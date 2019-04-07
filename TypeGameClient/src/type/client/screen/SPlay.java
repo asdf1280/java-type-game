@@ -286,7 +286,7 @@ public class SPlay extends JPanel {
 							if (fw.jla == null) {
 								continue;
 							}
-							fw.y += d / 10 * fw.jla.getText().length();
+							fw.y += d * 10 / fw.jla.getText().length();
 							fw.setLocation(fw.getX(), (int) fw.y);
 							if (fw.jla != null)
 								fw.jla.setLocation(fw.getX() + fw.getWidth() / 2 - fw.jla.getWidth() / 2,
