@@ -14,6 +14,7 @@ import type.server.game.MatchMaking;
 
 public class Server {
 	public static EventLoopGroup gameGroup;
+
 	public static void main(String[] args) throws Exception {
 		l.info("ServerBootstrap", "Starting TypeServer.");
 		{
@@ -32,10 +33,12 @@ public class Server {
 			sb.group(boss, work).channel(NioServerSocketChannel.class).localAddress(Utils.port)
 					.childHandler(new ServerInitializer());
 
+			ChannelFuture ff = sb.bind().sync();
+			l.info("ServerBootstrap", "Opened server socket on port " + Utils.port);
+
 			// Server booting here
 			MatchMaking.startThread(game);
-
-			ChannelFuture ff = sb.bind().sync();
+			
 			l.info("ServerBootstrap", "Started server.");
 			ff.channel().closeFuture().sync();
 		} finally {

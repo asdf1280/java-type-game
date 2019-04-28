@@ -10,7 +10,7 @@ import type.server.main.Server;
 public class TypeMatch {
 	private static final int MAX_USERS_PER_MATCH = 200;
 	private static final int WAIT_SECONDS = 40;
-	private static final int ADD_AI_UNTIL = 100;
+	private static final int ADD_AI_UNTIL = 50;
 	private static final int COUNTDOWN_MIN_PLAYERS = 5;
 	private static final int PLAYER_GOAL = 150;
 	private static final int TICKS_PER_SECOND = 20;
@@ -36,14 +36,20 @@ public class TypeMatch {
 
 	public TypeMatch() {
 		Runnable gameTick = new Runnable() {
-			long lastRun = System.currentTimeMillis();
 			long ticks = 0;
 			long gameStartTicks = 0;
+			boolean healthChanged = false;
+			int lastUsers = 0;
+			long lastRun = System.currentTimeMillis();
+			int lastInterval = 0;
+			int preferredSleepTime = TICKRATE;
 
 			GameState gs = GameState.WAITING;
 
 			@Override
 			public void run() {
+				lastInterval = (int) Math.max(0l, (System.currentTimeMillis() - lastRun) - preferredSleepTime);
+				lastRun = System.currentTimeMillis();
 				ticks++;
 				for (int i = 0; i < users.size(); i++) {
 					PlayerData mud = users.get(i);
@@ -73,8 +79,9 @@ public class TypeMatch {
 					if (isWaiting() && ticks % 8 == 0 && users.size() < ADD_AI_UNTIL) {
 						users.add(new BotUserData());
 					}
-					if (isWaiting()) {
-						long leftTime = WAIT_SECONDS - ((System.currentTimeMillis() - cStartTime) / 1000);
+					if (isWaiting() & dd) {
+						int leftTime = (int) (WAIT_SECONDS - ((System.currentTimeMillis() - cStartTime) / 1000));
+						lastUsers = leftTime;
 						for (PlayerData mud : users) {
 							mud.countDown((int) leftTime, users.size());
 						}
@@ -92,7 +99,7 @@ public class TypeMatch {
 							if (players == 0) {
 								Utils.l.fine("TypeMatch", "No real player found. Aborting game.");
 								ended = true;
-								return;
+//								return;
 							}
 						}
 						int botsAdded = 0;
@@ -106,7 +113,6 @@ public class TypeMatch {
 							mud.message("Preparing game...");
 						}
 					}
-
 					break;
 				case LOADING:
 					if (System.currentTimeMillis() - makeTime <= WAIT_SECONDS * 1000 + 2000) {
@@ -126,54 +132,48 @@ public class TypeMatch {
 							public void score(int score) {
 								// Damage all players
 								// This code is very buggy when players die at the same moment
-//									Utils.l.fine("TypeMatch", "User scored " + score);
 								if (ended) { // Game already ended
 									// ignore packet
 									return;
 								}
+								System.out.println(mud + ": " + score);
 								mud.scores += score;
 								mud.damages = 0;
 								mud.health = Math.min(mh, mud.health + score * (users.size() / 3));
 								mud.setHealth(mud.health);
 								// 플레이어 랜덤으로 한명 씩 꺼내면서 (남은 인원 5명 이하이고 처음 죽은 사람이 나오면) 또는 (죽은 사람이 있으면)
 								HashSet<Integer> s = new HashSet<>();
-								for (boolean b = false; (users.size() > 3 || !b) && !users.isEmpty(); b = true) {
+								for (int i = 0; (users.size() > 3 || i == 0) && !users.isEmpty(); i++) {
 									int idx = (int) (Math.random() * users.size());
 									while (s.contains(idx)) {
 										idx = (int) (Math.random() * users.size());
 									}
 									s.add(idx);
 									PlayerData pd = users.get(idx);
-//									if (pd.equals(mud))
-//										return;
-//									if (pd.health < 0) {
-//										continue;
-//									}
-									double damage = score * (1 + mud.damages / 50);
+									double damage = score * (1 + pd.damages / 50);
 									if (pd.health - damage <= 0) {
-//											Utils.l.fine("TypeMatch", "Processing USER DIED");
 										pd.health = 0;
 										killUser(pd, users.size());
-										for (PlayerData mud : users) {
-											mud.message("Left players: " + users.size());
-										}
 									} else {
 										pd.health -= damage;
 										pd.setHealth(pd.health);
 										mud.damages++;
 									}
 								}
+								healthChanged = true;
 							}
 						};
 						mud.playSignal(mh);
 					}
 
+					System.out.println("Starting match!!!!!===================================");
 					maxUsers = users.size();
 					gameStartTicks = ticks;
 					gs = GameState.PLAYING;
+					lastUsers = 0;
 					break;
 				case PLAYING:
-//					Utils.l.fine("TypeMatch", "Game tick in progress");
+//					System.out.println("PLAY TICK!!!!!!!");
 					if (users.size() == 1) {
 						users.get(0).health = 0;
 						killUser(users.get(0), 1);
@@ -184,11 +184,12 @@ public class TypeMatch {
 						ended = true;
 					}
 					long df = 280 - (ticks % 280) - 1;
-					if ((df == 200 || df == 100 || (df <= 60 && df >= 20)) && ticks - gameStartTicks > 280) {
+					if ((df == 200 || df == 100 || (df <= 60 && df >= 20)) && ticks - gameStartTicks > 280
+							&& ticks % 20 == 0) {
 						for (PlayerData mud : users) {
 							mud.message("The lowest score will die in " + (df / 20) + " seconds!");
 						}
-					} else if (df <= 0 && ticks - gameStartTicks > 280) {
+					} else if (df <= 0 && ticks - gameStartTicks > 280 && ticks % TICKS_PER_SECOND == 0) {
 						double lows = -1;
 						PlayerData lowp = null;
 						lowp = users.get(0);
@@ -205,8 +206,9 @@ public class TypeMatch {
 						lowp.health = 0;
 						killUser(lowp, users.size());
 					}
+					
 
-					if (ticks % 15 == 0) {
+					if (ticks % 20 == 0 && healthChanged) {
 						double sum = 0;
 						double min = users.get(0).health;
 						double max = 0;
@@ -220,9 +222,18 @@ public class TypeMatch {
 							mud.userStatus(max, sum, min);
 						}
 					}
-					if(ticks % 25 == 0) {
+					if (users.size() != lastUsers) {
+						lastUsers = users.size();
 						for (int i = 0; i < users.size(); i++) {
 							users.get(i).leftUsers(users.size());
+						}
+					}
+					//per bot damage
+					if(ticks % 20 == 0) {
+						for(int i=0;i<users.size();i++) {
+							if(users.get(i) instanceof BotUserData) {
+								users.get(i).worker.score(1);
+							}
 						}
 					}
 					break;
@@ -232,8 +243,7 @@ public class TypeMatch {
 
 			private void end() {
 				if (!ended()) {
-					lastRun = System.currentTimeMillis();
-					long dlyMs = lastRun + TICKRATE - System.currentTimeMillis();
+					long dlyMs = lastRun + TICKRATE - System.currentTimeMillis() - lastInterval;
 					if (dlyMs < 0) {
 						Utils.l.warning("TypeMatch",
 								"Can't keep up! Tick took too long and tick rate is extremely low!");

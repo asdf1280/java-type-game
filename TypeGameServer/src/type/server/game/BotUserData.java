@@ -1,7 +1,5 @@
 package type.server.game;
 
-import type.common.work.Utils;
-
 public class BotUserData extends PlayerData {
 
 	@Override
@@ -17,24 +15,25 @@ public class BotUserData extends PlayerData {
 		return true;
 	}
 
-	private final int randomInterval = (int) (Math.random() * 1500) + 500;
-	private final int minimumTime = (int) (Math.random() * 1500) + 1500;
+//	private final int randomInterval = (int) (Math.random() * 1500) + 500;
+//	private final int minimumTime = (int) (Math.random() * 1500) + 1500;
 
 	@Override
 	public void playSignal(double h) {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				Utils.sleep((int) (Math.random() * randomInterval) + minimumTime);
-				while (health > 0) {
-//					Utils.l.fine("BotUserData", "Adding score. Health: " + health);
-					worker.score((int) (Math.random() * 12) + 4);
-					Utils.sleep((int) (Math.random() * randomInterval) + minimumTime);
-				}
-			}
-		}).start();
+//		g.schedule(new BotscoreRunnable(), (int) (Math.random() * randomInterval) + minimumTime, TimeUnit.MILLISECONDS);
 	}
+//
+//	private static DefaultEventLoopGroup g = new DefaultEventLoopGroup(5);
+//
+//	private class BotscoreRunnable implements Runnable {
+//		@Override
+//		public void run() {
+//			if (health <= 0)
+//				return;
+//			worker.score(((int) (Math.random() * 12) + 4) * 15);
+//			g.schedule(this, ((int) (Math.random() * randomInterval) + minimumTime) * 15, TimeUnit.MILLISECONDS);
+//		}
+//	}
 
 	@Override
 	public void setHealth(double h) {
@@ -57,7 +56,7 @@ public class BotUserData extends PlayerData {
 	@Override
 	public void userStatus(double max, double avg, double min) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

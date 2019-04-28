@@ -60,9 +60,14 @@ public class MatchUserData extends PlayerData implements PacketPlaySbListener {
 		handle.sendPacket(p1);
 	}
 
+	long lastHealth = 0;
+
 	@Override
 	public void setHealth(double h) {
 		// TODO add health packet
+		if (System.currentTimeMillis() - lastHealth < 100)
+			return;
+		lastHealth = System.currentTimeMillis();
 		PacketCbPlaySetHealth p = new PacketCbPlaySetHealth();
 		p.health = h;
 		handle.sendPacket(p);

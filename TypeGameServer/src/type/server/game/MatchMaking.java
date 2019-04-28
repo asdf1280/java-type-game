@@ -20,10 +20,10 @@ public class MatchMaking {
 
 			public void run() {
 //				Utils.l.info("Matchmaking", "Joinable matches: " + joinable.size());
-//				if(joinable.isEmpty()) {
-//					Utils.l.info("Matchmaking", "Initializing first match");
-//					joinable.add(new TypeMatch());
-//				}
+				if(joinable.isEmpty()) {
+					Utils.l.info("Matchmaking", "Initializing first match");
+					joinable.add(new TypeMatch());
+				}
 				int matched = 0;
 				while (matched++ < 100 && !queue.isEmpty()) {
 					MatchUserData mud = queue.removeFirst();

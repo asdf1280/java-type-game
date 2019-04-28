@@ -140,7 +140,6 @@ public class SMenu extends JPanel {
 						SPlayOnline play = new SPlayOnline(cursor);
 						Client.app.lp.setLayer(play, Layers.MENU.layer);
 						Client.app.lp.add(play);
-//						play.initializeComponent("searchedwords");
 						play.initializeComponent("searchedwords");
 						System.out.println("MATCH FOUND!!!!!!!!!!!!!!!!!!!!!!!!!!!1");
 						playHandler = play.pc;

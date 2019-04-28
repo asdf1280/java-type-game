@@ -185,14 +185,13 @@ public class SPlayOnline extends JPanel {
 				@Override
 				public void run() {
 					while (isDisplayable()) {
-						Utils.sleep(1500);
+						Utils.sleep(2000);
 						if (!gameStarted)
 							continue;
 						FallingWord e = new FallingWord();
 						e.setSize(200, 50);
 						e.text = wds[(int) (Math.random() * wds.length)].split(Pattern.quote("\r"))[0].toLowerCase();
 						double rd = r.nextDouble();
-//						System.out.println(rd);
 						if ((rd) < 0.44) {
 							e.getJla().setForeground(Color.green);
 						} else if ((rd -= 0.44) < 0.03) {
@@ -225,12 +224,17 @@ public class SPlayOnline extends JPanel {
 				@Override
 				public void run() {
 					while (isDisplayable()) {
-						double d = 1.7 / 10 * Math.max(score, 20)
+						double d = 1.7 / 14 * Math.max(score, 20)
 								/ (60.0 + (startTime - System.currentTimeMillis()) / -3000.0);
 						d = Math.max(d, 0.7);
 						Label4.setText("낙하 계수: " + ((double) Math.round(d * 10000) / 10000));
 						for (int i = 0; i < words.size(); i++) {
-							FallingWord fw = words.get(i);
+							FallingWord fw = null;
+							try {
+								fw = words.get(i);
+							} catch (ArrayIndexOutOfBoundsException e) {
+								continue;
+							}
 							if (fw.jla == null) {
 								continue;
 							}
@@ -249,7 +253,7 @@ public class SPlayOnline extends JPanel {
 								}
 							}
 						}
-						Utils.sleep(6);
+						Utils.sleep(10);
 					}
 				}
 			}).start();
@@ -257,7 +261,7 @@ public class SPlayOnline extends JPanel {
 			e.printStackTrace();
 		}
 
-		CountTime = new JLabel("  ");
+		CountTime = new JLabel("    ");
 		CountTime.setFont(new Font("Segoe UI", 1, 130));
 		CountTime.setSize(getWidth() / 2, CountTime.getPreferredSize().height);
 		CountTime.setLocation(getWidth() / 4, getHeight() / 2 - CountTime.getHeight() / 2);
