@@ -7,6 +7,7 @@ import type.common.packet.login.PacketCbLoginAuthenticateResult;
 import type.common.packet.login.PacketSbLoginAnonymous;
 import type.common.packet.login.PacketSbLoginAuthenticate;
 import type.common.packet.match.PacketSbMatchCancel;
+import type.common.packet.play.PacketSbPlayScore;
 import type.common.packet.singleplayer.PacketSbSingleStopPlay;
 import type.common.packet.user.PacketSbUserLobbyChat;
 import type.common.packet.user.PacketSbUserPlaySingle;
@@ -117,5 +118,14 @@ public class TypeNetworkWorker extends NetworkWorker {
 	@Override
 	public void setMatchCallback(MatchCallback mcb) {
 		ci.handle.mc = mcb;
+	}
+
+	@Override
+	public void play_score(int score) {
+		if (score <= 0)
+			return;
+		PacketSbPlayScore p = new PacketSbPlayScore();
+		p.score = score;
+		ci.handle.sendPacket(p);
 	}
 }

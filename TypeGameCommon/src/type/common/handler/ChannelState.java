@@ -17,8 +17,18 @@ import type.common.packet.login.PacketSbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginHandshake;
 import type.common.packet.login.PacketSbLoginTest;
 import type.common.packet.match.PacketCbMatchCanceled;
+import type.common.packet.match.PacketCbMatchFound;
 import type.common.packet.match.PacketCbMatchStarted;
 import type.common.packet.match.PacketSbMatchCancel;
+import type.common.packet.play.PacketCbPlayCountdownTime;
+import type.common.packet.play.PacketCbPlayGameMessage;
+import type.common.packet.play.PacketCbPlayGameOver;
+import type.common.packet.play.PacketCbPlayHealthStatus;
+import type.common.packet.play.PacketCbPlayLeftUsers;
+import type.common.packet.play.PacketCbPlayPrepareGame;
+import type.common.packet.play.PacketCbPlaySetHealth;
+import type.common.packet.play.PacketCbPlaySetMaxHealth;
+import type.common.packet.play.PacketSbPlayScore;
 import type.common.packet.singleplayer.PacketSbSingleStopPlay;
 import type.common.packet.user.PacketCbUserLobbyChat;
 import type.common.packet.user.PacketSbUserLobbyChat;
@@ -65,6 +75,7 @@ public enum ChannelState {
 		{
 			add(PacketDirection.CLIENTBOUND, PacketCbMatchCanceled.class);
 			add(PacketDirection.CLIENTBOUND, PacketCbMatchStarted.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbMatchFound.class);
 
 			add(PacketDirection.SERVERBOUND, PacketSbMatchCancel.class);
 
@@ -78,6 +89,17 @@ public enum ChannelState {
 	},
 	PLAY(3) {
 		{
+			add(PacketDirection.CLIENTBOUND, PacketCbPlayGameOver.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlayGameMessage.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlayLeftUsers.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlaySetHealth.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlaySetMaxHealth.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlayPrepareGame.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlayCountdownTime.class);
+			add(PacketDirection.CLIENTBOUND, PacketCbPlayHealthStatus.class);
+
+			add(PacketDirection.SERVERBOUND, PacketSbPlayScore.class);
+
 			addAllPackets();
 		}
 

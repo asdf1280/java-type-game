@@ -16,7 +16,7 @@ import javax.swing.JTextPane;
 
 import type.client.component.KButton;
 import type.client.main.App.Layers;
-import type.client.main.Main;
+import type.client.main.Client;
 import type.common.work.Utils;
 
 public class SEnd extends JPanel {
@@ -48,11 +48,11 @@ public class SEnd extends JPanel {
 		Button1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Main.app.lp.remove(SEnd.this);
+				Client.app.lp.remove(SEnd.this);
 				
-				SMenu menu = new SMenu(c, Main.nw);
-				Main.app.lp.setLayer(menu, Layers.MENU.layer);
-				Main.app.lp.add(menu);
+				SMenu menu = new SMenu(c, Client.nw);
+				Client.app.lp.setLayer(menu, Layers.MENU.layer);
+				Client.app.lp.add(menu);
 				menu.initializeComponent();
 				Utils.l.info("SEnd", "Showed main menu");
 				

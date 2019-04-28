@@ -22,10 +22,15 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import type.client.component.KButton;
+import type.client.handler.TypeClientInboundHandler;
 import type.client.main.App.Layers;
-import type.client.main.Main;
+import type.client.main.Client;
 import type.client.net.ChatCallback;
+import type.client.net.MatchCallback;
 import type.client.net.NetworkWorker;
+import type.common.packet.match.PacketCbMatchCanceled;
+import type.common.packet.match.PacketCbMatchFound;
+import type.common.packet.match.PacketCbMatchStarted;
 import type.common.work.Utils;
 
 public class SMenu extends JPanel {
@@ -54,7 +59,7 @@ public class SMenu extends JPanel {
 		// SMenu
 		setLayout(null);
 
-		Main.frm.addWindowListener(new WindowAdapter() {
+		Client.frm.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				nw.closeConnection();
@@ -66,62 +71,84 @@ public class SMenu extends JPanel {
 		Button1 = new KButton();
 		Button1.setFont(new Font("맑은 고딕", 1, 50));
 		Button1.setText("싱글플레이");
-		Button1.setSize(350, 120);
+		Button1.setSize(350, 70);
 		Button1.setBackground(new Color(255, 215, 0));
-		Button1.setLocation((getWidth() - Button1.getWidth()) / 2, (getHeight() - Button1.getHeight()) / 2);
+		Button1.setLocation((getWidth() - Button1.getWidth()) / 2, (getHeight() - Button1.getHeight()) / 2 - 50);
 		Button1.setForeground(Color.white);
 		Button1.addMouseListener(cursor);
 		Button1.addActionListener(e -> {
-			Main.app.lp.remove(SMenu.this);
+			Client.app.lp.remove(SMenu.this);
 
 			SLoad load = new SLoad(cursor);
-			Main.app.lp.setLayer(load, Layers.LOAD.layer);
-			Main.app.lp.add(load);
+			Client.app.lp.setLayer(load, Layers.LOAD.layer);
+			Client.app.lp.add(load);
 			load.initializeComponent();
 
 			new Thread(() -> {
 				Utils.sleep(1000);
 
-				Main.app.lp.remove(load);
+				Client.app.lp.remove(load);
 
-				Main.nw.singleToggle(true);
+				Client.nw.singleToggle(true);
 
 				SPlay play = new SPlay(cursor);
-				Main.app.lp.setLayer(play, Layers.MENU.layer);
-				Main.app.lp.add(play);
+				Client.app.lp.setLayer(play, Layers.MENU.layer);
+				Client.app.lp.add(play);
 				play.initializeComponent("searchedwords");
 			}).start();
 		});
 		add(Button1);
-		
+
 		Button3 = new KButton();
 		Button3.setFont(new Font("맑은 고딕", 1, 50));
 		Button3.setText("멀티플레이");
-		Button3.setSize(350, 120);
+		Button3.setSize(350, 70);
 		Button3.setBackground(new Color(200, 0, 0));
 		Button3.setLocation((getWidth() - Button3.getWidth()) / 2, Button1.getY() + Button1.getHeight());
 		Button3.setForeground(Color.white);
 		Button3.addMouseListener(cursor);
-		Button3.addActionListener(e -> {
-			Main.app.lp.remove(SMenu.this);
+		Button3.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Client.app.lp.remove(SMenu.this);
 
-			SLoad load = new SLoad(cursor);
-			Main.app.lp.setLayer(load, Layers.LOAD.layer);
-			Main.app.lp.add(load);
-			load.initializeComponent();
+				final SLoad load = new SLoad(cursor);
+				Client.app.lp.setLayer(load, Layers.LOAD.layer);
+				Client.app.lp.add(load);
+				load.initializeComponent();
+				load.Label1.setText("서버와 통신 중...");
 
-			new Thread(() -> {
-				Utils.sleep(1000);
+				nw.setMatchCallback(new MatchCallback() {
 
-				Main.app.lp.remove(load);
+					@Override
+					public void matchInfo(PacketCbMatchStarted packet) {
+						load.Label1.setText("매치메이킹이 시작되었습니다.");
+					}
 
-				Main.nw.singleToggle(true);
+					@Override
+					public void matchCanceled(PacketCbMatchCanceled packet) {
+						// show menu
+						SMenu menu = new SMenu(cursor, Client.nw);
+						Client.app.lp.setLayer(menu, Layers.MENU.layer);
+						Client.app.lp.add(menu);
+						menu.initializeComponent();
+					}
 
-				SPlay play = new SPlay(cursor);
-				Main.app.lp.setLayer(play, Layers.MENU.layer);
-				Main.app.lp.add(play);
-				play.initializeComponent("searchedwords");
-			}).start();
+					@Override
+					public void matchFound(PacketCbMatchFound packet, TypeClientInboundHandler handle) {
+						Client.app.lp.remove(load);
+						SPlayOnline play = new SPlayOnline(cursor);
+						Client.app.lp.setLayer(play, Layers.MENU.layer);
+						Client.app.lp.add(play);
+//						play.initializeComponent("searchedwords");
+						play.initializeComponent("searchedwords");
+						System.out.println("MATCH FOUND!!!!!!!!!!!!!!!!!!!!!!!!!!!1");
+						playHandler = play.pc;
+						playHandler.handle = handle;
+					}
+				});
+				nw.user_matchmake_start();
+			}
 		});
 		add(Button3);
 
@@ -136,7 +163,11 @@ public class SMenu extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Main.frm.dispose();
+				Client.frm.dispose();
+				new Thread(() -> {
+					Utils.sleep(1000);
+					System.exit(0);
+				}).start();
 			}
 		});
 		add(Button2);
@@ -163,14 +194,17 @@ public class SMenu extends JPanel {
 		TextPane2.setFont(new Font("바탕", 0, 20));
 		nw.setChatCallback(new ChatCallback() {
 			private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+
 			@Override
 			public void processChat(String adr, String text) {
-				if(text.isBlank()) return;
-				
-				TextPane2.setText("[" + adr + "][" + sdf.format(new Date(System.currentTimeMillis())) + "] " + text + "\n" + TextPane2.getText());
-				if(TextPane2.getText().split(Pattern.quote("\n")).length > 11) {
+				if (text.isBlank())
+					return;
+
+				TextPane2.setText("[" + adr + "][" + sdf.format(new Date(System.currentTimeMillis())) + "] " + text
+						+ "\n" + TextPane2.getText());
+				if (TextPane2.getText().split(Pattern.quote("\n")).length > 11) {
 					String[] ar = TextPane2.getText().split(Pattern.quote("\n"));
-					String sp = "\n" + ar[ar.length-1];
+					String sp = "\n" + ar[ar.length - 1];
 					TextPane2.setText(TextPane2.getText().substring(0, TextPane2.getText().length() - sp.length()));
 				}
 			}
@@ -220,7 +254,7 @@ public class SMenu extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(TextField1.getText().length() < 70) {
+				if (TextField1.getText().length() < 70) {
 					nw.chat(TextField1.getText());
 				}
 				TextField1.setText("");

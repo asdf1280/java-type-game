@@ -12,7 +12,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import type.common.work.Utils;
 import type.server.game.MatchMaking;
 
-public class Main {
+public class Server {
+	public static EventLoopGroup gameGroup;
 	public static void main(String[] args) throws Exception {
 		l.info("ServerBootstrap", "Starting TypeServer.");
 		{
@@ -25,6 +26,7 @@ public class Main {
 		EventLoopGroup boss = new NioEventLoopGroup(5);
 		EventLoopGroup work = new NioEventLoopGroup(5);
 		EventLoopGroup game = new NioEventLoopGroup(5);
+		gameGroup = game;
 		try {
 			ServerBootstrap sb = new ServerBootstrap();
 			sb.group(boss, work).channel(NioServerSocketChannel.class).localAddress(Utils.port)

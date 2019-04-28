@@ -12,6 +12,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import type.client.main.Network;
 import type.client.net.ChatCallback;
 import type.client.net.MatchCallback;
+import type.client.net.PlayCallback;
 import type.common.handler.ChannelState;
 import type.common.handler.TypeCommonPacketDecryptor;
 import type.common.handler.TypeCommonPacketEncryptor;
@@ -19,7 +20,6 @@ import type.common.listener.PacketAllCbListener;
 import type.common.listener.PacketListener;
 import type.common.listener.PacketLoginCbListener;
 import type.common.listener.PacketMatchCbListener;
-import type.common.listener.PacketPlayCbListener;
 import type.common.listener.PacketSingleCbListener;
 import type.common.listener.PacketUserCbListener;
 import type.common.packet.Packet;
@@ -29,12 +29,13 @@ import type.common.packet.login.PacketCbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginEncrypt;
 import type.common.packet.login.PacketSbLoginHandshake;
 import type.common.packet.match.PacketCbMatchCanceled;
+import type.common.packet.match.PacketCbMatchFound;
 import type.common.packet.match.PacketCbMatchStarted;
 import type.common.packet.user.PacketCbUserLobbyChat;
 import type.common.work.Utils;
 
 public class TypeClientInboundHandler extends SimpleChannelInboundHandler<Packet<?>> implements PacketLoginCbListener,
-		PacketUserCbListener, PacketAllCbListener, PacketPlayCbListener, PacketSingleCbListener, PacketMatchCbListener {
+		PacketUserCbListener, PacketAllCbListener, PacketSingleCbListener, PacketMatchCbListener {
 
 	public Channel ch = null;
 	public ChannelHandlerContext ctx = null;
@@ -88,7 +89,11 @@ public class TypeClientInboundHandler extends SimpleChannelInboundHandler<Packet
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void processPacket(Packet msg) throws Exception {
-		msg.process(pl);
+		try {
+			msg.process(pl);
+		} catch (ClassCastException e) {
+			msg.process(dpl);
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -148,4 +153,14 @@ public class TypeClientInboundHandler extends SimpleChannelInboundHandler<Packet
 			mc.matchCanceled(packetCbMatchCanceled);
 		}
 	}
+
+	@Override
+	public void process(PacketCbMatchFound packet) {
+		if (mc != null) {
+			mc.matchFound(packet, this);
+			pl = mc.playHandler;
+		}		
+	}
+
+	public PlayCallback plc = null;
 }

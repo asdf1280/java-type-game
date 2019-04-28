@@ -11,4 +11,5 @@ public abstract class NetworkWorker {
 	public abstract void user_matchmake_start();
 	public abstract void user_matchmake_cancel();
 	public abstract void setMatchCallback(MatchCallback mcb);
+	public abstract void play_score(int score);
 }

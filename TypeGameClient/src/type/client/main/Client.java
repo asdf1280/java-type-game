@@ -17,19 +17,19 @@ import type.client.screen.SFail;
 import type.client.screen.SMenu;
 import type.common.work.Utils;
 
-public class Main {
+public class Client {
 	public static String version = "1.0";
 	public static String verSuf = "alpha";
 
 	public static void main(String[] args) {
-		new Main();
+		new Client();
 	}
 
 	public static App app;
 	public static JFrame frm;
 	public static NetworkWorker nw;
 
-	public Main() {
+	public Client() {
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 		frm = new JFrame("Typing game");
 		frm.setUndecorated(true);

@@ -9,19 +9,20 @@ import type.common.work.Utils;
 
 public class MatchMaking {
 	public static final LinkedList<MatchUserData> queue = new LinkedList<>();
+	public static void addQueue(MatchUserData mud) {
+		queue.add(mud);
+		Utils.l.info("Matchmaking", mud.handle.getName() + ": Matchmaking started");
+	}
 
 	public static void startThread(EventLoopGroup group) {
 		Runnable matchMaker = new Runnable() {
 			private ArrayList<TypeMatch> joinable = new ArrayList<>();
 
 			public void run() {
-				if (queue.isEmpty())
-					return;
-//				boolean newMatch = false;
-//				newMatch = newMatch || (!newMatch && currentMatch == null);
-//				newMatch = newMatch || (!newMatch && !currentMatch.acceptMoreUsers());
-//				if(newMatch) {
-//					currentMatch = new TypeMatch();
+//				Utils.l.info("Matchmaking", "Joinable matches: " + joinable.size());
+//				if(joinable.isEmpty()) {
+//					Utils.l.info("Matchmaking", "Initializing first match");
+//					joinable.add(new TypeMatch());
 //				}
 				int matched = 0;
 				while (matched++ < 100 && !queue.isEmpty()) {
@@ -29,6 +30,7 @@ public class MatchMaking {
 					TypeMatch tojoin = null;
 					for (int i = 0; i < joinable.size(); i++) {
 						TypeMatch jointest = joinable.get(i);
+						Utils.l.info("Matchmaking", "Match " + jointest.hashCodeString() + ": Waiting state info: " + jointest.isWaiting());
 						if (!jointest.isWaiting()) {
 							joinable.remove(jointest);
 							i--;
@@ -50,7 +52,7 @@ public class MatchMaking {
 				}
 			}
 		};
-		group.scheduleAtFixedRate(matchMaker, 5, 5, TimeUnit.SECONDS);
+		group.scheduleAtFixedRate(matchMaker, 0, 5, TimeUnit.SECONDS);
 		Utils.l.info("Matchmaking", "Scheduled matchmaking!");
 	}
 }
