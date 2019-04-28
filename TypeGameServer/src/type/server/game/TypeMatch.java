@@ -68,7 +68,7 @@ public class TypeMatch {
 						ticks = 0;
 					} else if (System.currentTimeMillis() - makeTime > 3000
 							&& users.size() + 2 < COUNTDOWN_MIN_PLAYERS) {
-						users.add(new BotUserData());
+//						users.add(new BotUserData());
 					}
 					for (PlayerData mud : users) {
 						mud.countDown(-1, users.size());
@@ -77,7 +77,7 @@ public class TypeMatch {
 				case MATCHING:
 					boolean dd = ticks % 20 == 0;
 					if (isWaiting() && ticks % 8 == 0 && users.size() < ADD_AI_UNTIL) {
-						users.add(new BotUserData());
+//						users.add(new BotUserData());
 					}
 					if (isWaiting() & dd) {
 						int leftTime = (int) (WAIT_SECONDS - ((System.currentTimeMillis() - cStartTime) / 1000));
@@ -104,7 +104,7 @@ public class TypeMatch {
 						}
 						int botsAdded = 0;
 						while (users.size() < ADD_AI_UNTIL) {
-							addUser(new BotUserData());
+//							addUser(new BotUserData());
 							botsAdded++;
 						}
 						Utils.l.fine("TypeMatch", "Added " + botsAdded + " bot" + (botsAdded == 1 ? "" : "s") + ".");
@@ -229,13 +229,13 @@ public class TypeMatch {
 						}
 					}
 					//per bot damage
-					if(ticks % 20 == 0) {
-						for(int i=0;i<users.size();i++) {
-							if(users.get(i) instanceof BotUserData) {
-								users.get(i).worker.score(1);
-							}
-						}
-					}
+//					if(ticks % 20 == 0) {
+//						for(int i=0;i<users.size();i++) {
+//							if(users.get(i) instanceof BotUserData) {
+//								users.get(i).worker.score(1);
+//							}
+//						}
+//					}
 					break;
 				}
 				end();
